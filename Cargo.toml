@@ -1,0 +1,15 @@
+[package]
+name = "foray-into-bevy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = "0.18"
+
+# optimize the dev profile a bit
+[profile.dev]
+opt-level = 1
+
+# optimize the dependencies in the dev profile even more
+[profile.dev.package."*"]
+opt-level = 3
