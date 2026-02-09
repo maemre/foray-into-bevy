@@ -1,4 +1,4 @@
-use bevy::prelude::DefaultPlugins;
+use bevy::prelude::*;
 
 fn main() {
     App::new()
