@@ -5,7 +5,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
-        .add_systems(FixedUpdate, gravity)
+        .add_systems(FixedUpdate, (gravity, check_out_of_bounds))
         .add_systems(Update, handle_input)
         .run();
 }

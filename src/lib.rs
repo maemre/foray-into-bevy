@@ -19,8 +19,10 @@ pub struct Velocity(f32);
 
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
-const DEFAULT_GRAVITY: f32 = - MAX_HEIGHT / 2.0;
+const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
 const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
+const PLAYER_HALF_HEIGHT: f32 = 25.0;
+const PLAYER_HALF_WIDTH: f32 = 50.0;
 
 pub fn setup(
     mut commands: Commands,
@@ -40,7 +42,7 @@ pub fn setup(
     ));
 
     // let's show a simple ellipse
-    let ellipse = Mesh2d(meshes.add(Ellipse::new(50.0, 25.0)));
+    let ellipse = Mesh2d(meshes.add(Ellipse::new(PLAYER_HALF_WIDTH, PLAYER_HALF_HEIGHT)));
     let material = MeshMaterial2d(materials.add(Color::from(RED_600)));
 
     commands.spawn((
@@ -70,5 +72,16 @@ pub fn handle_input(
 ) {
     if keys.just_pressed(Key::Space) {
         velocity.0 += VELOCITY_BOOST;
+    }
+}
+
+/// Detect when the player goes out of bounds
+pub fn check_out_of_bounds(transform: Single<&Transform, With<Player>>) {
+    let Vec3 { y, .. } = transform.translation;
+    let bottom = y - PLAYER_HALF_HEIGHT;
+    let top = y + PLAYER_HALF_HEIGHT;
+
+    if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT * 2.0 {
+        info!("out of bounds!");
     }
 }
