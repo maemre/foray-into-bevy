@@ -1,5 +1,8 @@
 use bevy::{
-    camera::ScalingMode, color::palettes::tailwind::RED_600, input::keyboard::Key, prelude::*,
+    camera::ScalingMode,
+    color::palettes::tailwind::{GREEN_600, RED_600},
+    input::keyboard::Key,
+    prelude::*,
 };
 
 #[derive(Component)]
@@ -17,12 +20,24 @@ impl Default for Gravity {
 #[derive(Component, Default)]
 pub struct Velocity(f32);
 
+#[derive(Component)]
+pub struct TopPipe;
+
+#[derive(Component)]
+pub struct BottomPipe;
+
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
 const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
 const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
 const PLAYER_HALF_HEIGHT: f32 = 25.0;
 const PLAYER_HALF_WIDTH: f32 = 50.0;
+const PLAYER_X_POS: f32 = -MAX_WIDTH / 4.0;
+const PIPE_START: f32 = 0.0;
+const PIPE_END: f32 = MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH;
+const NUM_PIPES: usize = 3;
+const PIPE_HALF_WIDTH: f32 = 50.0;
+const PIPE_GAP: f32 = 150.0;
 
 pub fn setup(
     mut commands: Commands,
@@ -51,8 +66,39 @@ pub fn setup(
         Gravity::default(),
         ellipse,
         material,
-        Transform::from_xyz(0.0, 0.0, 1.0),
+        Transform::from_xyz(PLAYER_X_POS, 0.0, 1.0),
     ));
+}
+
+pub fn spawn_pipes(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let material = MeshMaterial2d(materials.add(Color::from(GREEN_600)));
+
+    for i in 0..NUM_PIPES {
+        // calculate the center x coordinate
+        let center_x = PIPE_START + (PIPE_END - PIPE_START) * i as f32 / (NUM_PIPES - 1) as f32;
+        info!("spawning pipe {i} at x coordinate: {center_x}");
+
+        let rect = Mesh2d(meshes.add(Rectangle::new(PIPE_HALF_WIDTH, MAX_HEIGHT - PIPE_GAP)));
+        // spawn the top pipe
+        commands.spawn((
+            TopPipe,
+            rect.clone(),
+            material.clone(),
+            Transform::from_xyz(center_x, MAX_HEIGHT / 2.0, 1.0),
+        ));
+
+        // spawn the bottom pipe
+        commands.spawn((
+            BottomPipe,
+            rect,
+            material.clone(),
+            Transform::from_xyz(center_x, -MAX_HEIGHT / 2.0, 1.0),
+        ));
+    }
 }
 
 /// The gravity system
@@ -76,12 +122,15 @@ pub fn handle_input(
 }
 
 /// Detect when the player goes out of bounds
-pub fn check_out_of_bounds(transform: Single<&Transform, With<Player>>) {
+pub fn check_out_of_bounds(
+    transform: Single<&Transform, With<Player>>,
+    mut exit: MessageWriter<AppExit>,
+) {
     let Vec3 { y, .. } = transform.translation;
     let bottom = y - PLAYER_HALF_HEIGHT;
     let top = y + PLAYER_HALF_HEIGHT;
 
     if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT * 2.0 {
-        info!("out of bounds!");
+        exit.write(AppExit::Success);
     }
 }
