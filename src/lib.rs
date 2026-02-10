@@ -190,7 +190,7 @@ pub fn detect_collisions(
     for pipe in pipes {
         let transform = transform_helper.compute_global_transform(pipe).unwrap();
         let pipe_collider =
-            Rectangle::new(PIPE_HEIGHT, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
+            Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
 
         if player_collider.intersects(&pipe_collider) {
             exit.write(AppExit::Success);
