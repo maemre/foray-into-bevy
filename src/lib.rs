@@ -1,6 +1,6 @@
 use bevy::{
     camera::ScalingMode,
-    color::palettes::tailwind::{GREEN_600, RED_600},
+    color::palettes::tailwind::{CYAN_300, GREEN_600, RED_600},
     input::keyboard::Key,
     math::bounding::{Bounded2d, BoundingCircle, IntersectsVolume},
     prelude::*,
@@ -48,6 +48,8 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    commands.insert_resource(ClearColor(Color::from(CYAN_300)));
+
     // spawn the camera
     commands.spawn((
         Camera2d,
