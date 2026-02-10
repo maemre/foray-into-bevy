@@ -28,16 +28,19 @@ pub struct BottomPipe;
 
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
-const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
+// const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
+const DEFAULT_GRAVITY: f32 = 0.0;
 const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
 const PLAYER_HALF_HEIGHT: f32 = 25.0;
 const PLAYER_HALF_WIDTH: f32 = 50.0;
 const PLAYER_X_POS: f32 = -MAX_WIDTH / 4.0;
-const PIPE_START: f32 = 0.0;
+const PIPE_START: f32 = -MAX_WIDTH / 6.0;
 const PIPE_END: f32 = MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH;
 const NUM_PIPES: usize = 3;
 const PIPE_HALF_WIDTH: f32 = 50.0;
 const PIPE_GAP: f32 = 150.0;
+const PIPE_SPEED: f32 = 100.0;
+pub const PIPE_SPAWN_PERIOD: f32 = MAX_WIDTH / (PIPE_SPEED * NUM_PIPES as f32);
 
 pub fn setup(
     mut commands: Commands,
@@ -75,30 +78,51 @@ pub fn spawn_pipes(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    let material = MeshMaterial2d(materials.add(Color::from(GREEN_600)));
-
     for i in 0..NUM_PIPES {
         // calculate the center x coordinate
         let center_x = PIPE_START + (PIPE_END - PIPE_START) * i as f32 / (NUM_PIPES - 1) as f32;
-        info!("spawning pipe {i} at x coordinate: {center_x}");
-
-        let rect = Mesh2d(meshes.add(Rectangle::new(PIPE_HALF_WIDTH, MAX_HEIGHT - PIPE_GAP)));
-        // spawn the top pipe
-        commands.spawn((
-            TopPipe,
-            rect.clone(),
-            material.clone(),
-            Transform::from_xyz(center_x, MAX_HEIGHT / 2.0, 1.0),
-        ));
-
-        // spawn the bottom pipe
-        commands.spawn((
-            BottomPipe,
-            rect,
-            material.clone(),
-            Transform::from_xyz(center_x, -MAX_HEIGHT / 2.0, 1.0),
-        ));
+        spawn_pipes_at(center_x, &mut commands, &mut meshes, &mut materials);
     }
+}
+
+fn spawn_pipes_at(
+    center_x: f32,
+    commands: &mut Commands,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<ColorMaterial>>,
+) {
+    info!("spawning pipes at x coordinate: {center_x}");
+    let material = MeshMaterial2d(materials.add(Color::from(GREEN_600)));
+    let rect = Mesh2d(meshes.add(Rectangle::new(PIPE_HALF_WIDTH, MAX_HEIGHT - PIPE_GAP)));
+    // spawn the top pipe
+    commands.spawn((
+        TopPipe,
+        rect.clone(),
+        material.clone(),
+        Transform::from_xyz(center_x, MAX_HEIGHT / 2.0, 1.0),
+    ));
+
+    // spawn the bottom pipe
+    commands.spawn((
+        BottomPipe,
+        rect,
+        material.clone(),
+        Transform::from_xyz(center_x, -MAX_HEIGHT / 2.0, 1.0),
+    ));
+}
+
+/// Spawn new pipes at the right edge of the screen
+pub fn spawn_new_pipes(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    spawn_pipes_at(
+        MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH,
+        &mut commands,
+        &mut meshes,
+        &mut materials,
+    );
 }
 
 /// The gravity system
@@ -132,5 +156,21 @@ pub fn check_out_of_bounds(
 
     if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT * 2.0 {
         exit.write(AppExit::Success);
+    }
+}
+
+/// Move pipes and despawn a pipe if it goes out of bounds
+pub fn move_pipes(
+    pipes: Query<(&mut Transform, Entity), Or<(With<TopPipe>, With<BottomPipe>)>>,
+    time: Res<Time>,
+    mut commands: Commands,
+) {
+    for (mut transform, entity) in pipes {
+        let x = &mut transform.translation.x;
+        *x -= PIPE_SPEED * time.delta_secs();
+        if *x + PIPE_HALF_WIDTH < -MAX_WIDTH / 2.0 {
+            // the pipe is out of bounds, delete it
+            commands.entity(entity).despawn();
+        }
     }
 }
