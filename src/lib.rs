@@ -1,4 +1,6 @@
-use bevy::{camera::ScalingMode, color::palettes::tailwind::RED_600, prelude::*};
+use bevy::{
+    camera::ScalingMode, color::palettes::tailwind::RED_600, input::keyboard::Key, prelude::*,
+};
 
 #[derive(Component)]
 pub struct Player;
@@ -18,6 +20,7 @@ pub struct Velocity(f32);
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
 const DEFAULT_GRAVITY: f32 = - MAX_HEIGHT / 2.0;
+const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
 
 pub fn setup(
     mut commands: Commands,
@@ -57,5 +60,15 @@ pub fn gravity(mut physics: Query<(&mut Transform, &mut Velocity, &Gravity)>, ti
         transform.translation.y += velocity.0 * time.delta_secs();
         // Δv = at
         velocity.0 += gravity.0 * time.delta_secs();
+    }
+}
+
+/// Handle user input
+pub fn handle_input(
+    mut velocity: Single<&mut Velocity, With<Player>>,
+    keys: Res<ButtonInput<Key>>,
+) {
+    if keys.just_pressed(Key::Space) {
+        velocity.0 += VELOCITY_BOOST;
     }
 }

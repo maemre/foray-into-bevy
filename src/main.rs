@@ -6,5 +6,6 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_systems(Startup, setup)
         .add_systems(FixedUpdate, gravity)
+        .add_systems(Update, handle_input)
         .run();
 }
