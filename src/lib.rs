@@ -2,6 +2,7 @@ use bevy::{
     camera::ScalingMode,
     color::palettes::tailwind::{GREEN_600, RED_600},
     input::keyboard::Key,
+    math::bounding::{Bounded2d, BoundingCircle, IntersectsVolume},
     prelude::*,
 };
 
@@ -28,8 +29,7 @@ pub struct BottomPipe;
 
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
-// const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
-const DEFAULT_GRAVITY: f32 = 0.0;
+const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
 const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
 const PLAYER_HALF_HEIGHT: f32 = 25.0;
 const PLAYER_HALF_WIDTH: f32 = 50.0;
@@ -38,6 +38,7 @@ const PIPE_START: f32 = -MAX_WIDTH / 6.0;
 const PIPE_END: f32 = MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH;
 const NUM_PIPES: usize = 3;
 const PIPE_HALF_WIDTH: f32 = 50.0;
+const PIPE_HEIGHT: f32 = MAX_HEIGHT - PIPE_GAP;
 const PIPE_GAP: f32 = 150.0;
 const PIPE_SPEED: f32 = 100.0;
 pub const PIPE_SPAWN_PERIOD: f32 = MAX_WIDTH / (PIPE_SPEED * NUM_PIPES as f32);
@@ -93,7 +94,7 @@ fn spawn_pipes_at(
 ) {
     info!("spawning pipes at x coordinate: {center_x}");
     let material = MeshMaterial2d(materials.add(Color::from(GREEN_600)));
-    let rect = Mesh2d(meshes.add(Rectangle::new(PIPE_HALF_WIDTH, MAX_HEIGHT - PIPE_GAP)));
+    let rect = Mesh2d(meshes.add(Rectangle::new(2.0 * PIPE_HALF_WIDTH, PIPE_HEIGHT)));
     // spawn the top pipe
     commands.spawn((
         TopPipe,
@@ -154,7 +155,7 @@ pub fn check_out_of_bounds(
     let bottom = y - PLAYER_HALF_HEIGHT;
     let top = y + PLAYER_HALF_HEIGHT;
 
-    if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT * 2.0 {
+    if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT / 2.0 {
         exit.write(AppExit::Success);
     }
 }
@@ -171,6 +172,25 @@ pub fn move_pipes(
         if *x + PIPE_HALF_WIDTH < -MAX_WIDTH / 2.0 {
             // the pipe is out of bounds, delete it
             commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn detect_collisions(
+    player: Single<Entity, With<Player>>,
+    pipes: Query<Entity, Or<(With<TopPipe>, With<BottomPipe>)>>,
+    transform_helper: TransformHelper,
+) {
+    let transform = transform_helper.compute_global_transform(*player).unwrap();
+    let player_collider = BoundingCircle::new(transform.translation().xy(), PLAYER_HALF_HEIGHT);
+
+    for pipe in pipes {
+        let transform = transform_helper.compute_global_transform(pipe).unwrap();
+        let pipe_collider =
+            Rectangle::new(PIPE_HEIGHT, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
+
+        if player_collider.intersects(&pipe_collider) {
+            info!("hit the pipe!");
         }
     }
 }

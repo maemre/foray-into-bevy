@@ -14,6 +14,7 @@ fn main() {
                 check_out_of_bounds,
                 move_pipes,
                 spawn_new_pipes.run_if(on_timer(Duration::from_secs_f32(PIPE_SPAWN_PERIOD))),
+                detect_collisions,
             ),
         )
         .add_systems(Update, handle_input)
