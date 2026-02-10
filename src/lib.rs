@@ -29,8 +29,8 @@ pub struct BottomPipe;
 
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
-const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 2.0;
-const VELOCITY_BOOST: f32 = MAX_HEIGHT / 4.0;
+const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 4.0;
+const VELOCITY_BOOST: f32 = MAX_HEIGHT / 8.0;
 const PLAYER_HALF_HEIGHT: f32 = 25.0;
 const PLAYER_HALF_WIDTH: f32 = 50.0;
 const PLAYER_X_POS: f32 = -MAX_WIDTH / 4.0;
