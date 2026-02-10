@@ -180,6 +180,7 @@ pub fn detect_collisions(
     player: Single<Entity, With<Player>>,
     pipes: Query<Entity, Or<(With<TopPipe>, With<BottomPipe>)>>,
     transform_helper: TransformHelper,
+    mut exit: MessageWriter<AppExit>,
 ) {
     let transform = transform_helper.compute_global_transform(*player).unwrap();
     let player_collider = BoundingCircle::new(transform.translation().xy(), PLAYER_HALF_HEIGHT);
@@ -190,7 +191,7 @@ pub fn detect_collisions(
             Rectangle::new(PIPE_HEIGHT, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
 
         if player_collider.intersects(&pipe_collider) {
-            info!("hit the pipe!");
+            exit.write(AppExit::Success);
         }
     }
 }
