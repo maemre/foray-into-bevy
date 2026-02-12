@@ -90,18 +90,18 @@ pub fn detect_collisions(
     player: Single<Entity, With<Player>>,
     pipes: Query<Entity, Or<(With<TopPipe>, With<BottomPipe>)>>,
     transform_helper: TransformHelper,
-    mut exit: MessageWriter<AppExit>,
+    mut commands: Commands,
 ) {
     let transform = transform_helper.compute_global_transform(*player).unwrap();
     let player_collider = BoundingCircle::new(transform.translation().xy(), PLAYER_HALF_HEIGHT);
 
     for pipe in pipes {
         let transform = transform_helper.compute_global_transform(pipe).unwrap();
-        let pipe_collider =
-            Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
+        let pipe_collider = Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT)
+            .aabb_2d(transform.translation().xy());
 
         if player_collider.intersects(&pipe_collider) {
-            exit.write(AppExit::Success);
+            commands.trigger(GameOver);
         }
     }
 }
@@ -110,8 +110,7 @@ pub struct PipePlugin;
 
 impl Plugin for PipePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_pipes)
-        .add_systems(
+        app.add_systems(Startup, spawn_pipes).add_systems(
             FixedUpdate,
             (
                 gravity,

@@ -28,6 +28,9 @@ pub struct TopPipe;
 #[derive(Component)]
 pub struct BottomPipe;
 
+#[derive(Event)]
+pub struct GameOver;
+
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
 const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 8.0;
@@ -67,6 +70,8 @@ pub fn setup(
         material,
         Transform::from_xyz(PLAYER_X_POS, 0.0, 1.0),
     ));
+
+    commands.add_observer(reset_game);
 }
 
 /// The gravity system
@@ -90,15 +95,31 @@ pub fn handle_input(
 }
 
 /// Detect when the player goes out of bounds
-pub fn check_out_of_bounds(
-    transform: Single<&Transform, With<Player>>,
-    mut exit: MessageWriter<AppExit>,
-) {
+pub fn check_out_of_bounds(transform: Single<&Transform, With<Player>>, mut commands: Commands) {
     let Vec3 { y, .. } = transform.translation;
     let bottom = y - PLAYER_HALF_HEIGHT;
     let top = y + PLAYER_HALF_HEIGHT;
 
     if bottom < -MAX_HEIGHT / 2.0 || top > MAX_HEIGHT / 2.0 {
-        exit.write(AppExit::Success);
+        commands.trigger(GameOver);
     }
+}
+
+fn reset_game(
+    _: On<GameOver>,
+    mut commands: Commands,
+    player: Single<Entity, With<Player>>,
+    pipes: Query<Entity, Or<(With<TopPipe>, With<BottomPipe>)>>,
+    meshes: ResMut<Assets<Mesh>>,
+    materials: ResMut<Assets<ColorMaterial>>,
+) {
+    // can trigger a second event to reset the pipes for better encapsulation
+    commands.entity(*player).insert((
+        Velocity::default(),
+        Transform::from_xyz(PLAYER_X_POS, 0.0, 1.0),
+    ));
+    for entity in pipes {
+        commands.entity(entity).despawn();
+    }
+    pipes::spawn_pipes(commands, meshes, materials);
 }
