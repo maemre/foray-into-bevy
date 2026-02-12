@@ -31,6 +31,9 @@ pub struct BottomPipe;
 #[derive(Event)]
 pub struct GameOver;
 
+#[derive(Component)]
+pub struct ScoreText;
+
 const MAX_WIDTH: f32 = 640.0;
 const MAX_HEIGHT: f32 = 360.0;
 const DEFAULT_GRAVITY: f32 = -MAX_HEIGHT / 8.0;
@@ -72,6 +75,13 @@ pub fn setup(
     ));
 
     commands.add_observer(reset_game);
+
+    commands.spawn((
+        ScoreText,
+        Text::new("0"),
+        Transform::from_xyz(0.0, 0.0, 0.0),
+        TextColor(Color::BLACK),
+    ));
 }
 
 /// The gravity system
