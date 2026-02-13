@@ -9,6 +9,12 @@ use bevy::time::common_conditions::on_timer;
 
 use super::*;
 
+#[derive(Component)]
+pub struct TopPipe;
+
+#[derive(Component)]
+pub struct BottomPipe;
+
 const PIPE_START: f32 = -MAX_WIDTH / 6.0;
 const PIPE_END: f32 = MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH;
 const NUM_PIPES: usize = 3;
@@ -61,6 +67,7 @@ pub fn spawn_new_pipes(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut score: ResMut<Score>,
 ) {
     spawn_pipes_at(
         MAX_WIDTH / 2.0 + PIPE_HALF_WIDTH,
@@ -68,6 +75,8 @@ pub fn spawn_new_pipes(
         &mut meshes,
         &mut materials,
     );
+
+    score.0 = score.0 + 1;
 }
 
 /// Move pipes and despawn a pipe if it goes out of bounds
@@ -90,7 +99,7 @@ pub fn detect_collisions(
     player: Single<Entity, With<Player>>,
     pipes: Query<Entity, Or<(With<TopPipe>, With<BottomPipe>)>>,
     transform_helper: TransformHelper,
-    mut exit: MessageWriter<AppExit>,
+    mut commands: Commands,
 ) {
     let transform = transform_helper.compute_global_transform(*player).unwrap();
     let player_collider = BoundingCircle::new(transform.translation().xy(), PLAYER_HALF_HEIGHT);
@@ -101,7 +110,7 @@ pub fn detect_collisions(
             Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
 
         if player_collider.intersects(&pipe_collider) {
-            exit.write(AppExit::Success);
+            commands.trigger(GameOver);
         }
     }
 }
