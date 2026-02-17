@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 use bevy::{
     camera::ScalingMode,
     color::palettes::tailwind::{CYAN_300, RED_600},
