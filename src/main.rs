@@ -13,6 +13,6 @@ fn main() {
                 check_out_of_bounds,
             ),
         )
-        .add_systems(Update, (handle_input, display_score))
+        .add_systems(Update, (handle_input, update_score_text))
         .run();
 }

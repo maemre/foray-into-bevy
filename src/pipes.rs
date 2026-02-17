@@ -75,8 +75,8 @@ pub fn spawn_new_pipes(
         &mut meshes,
         &mut materials,
     );
-
-    score.0 = score.0 + 1;
+    score.0 += 1;
+    info!("score! {}", score.0);
 }
 
 /// Move pipes and despawn a pipe if it goes out of bounds
@@ -123,8 +123,6 @@ impl Plugin for PipePlugin {
         .add_systems(
             FixedUpdate,
             (
-                gravity,
-                check_out_of_bounds,
                 move_pipes,
                 spawn_new_pipes.run_if(on_timer(Duration::from_secs_f32(PIPE_SPAWN_PERIOD))),
                 detect_collisions,

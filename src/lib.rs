@@ -44,14 +44,6 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
-    commands.insert_resource(Score::default());
-    commands.spawn((
-        ScoreText,
-        Text::new("0"),
-        Transform::from_xyz(0.0, 0.0, 0.0),
-        TextColor(Color::BLACK),
-        ));
-    
     commands.insert_resource(ClearColor(Color::from(CYAN_300)));
 
     // spawn the camera
@@ -80,6 +72,14 @@ pub fn setup(
     ));
 
     commands.add_observer(reset_game);
+
+    commands.insert_resource(Score::default());
+    commands.spawn((
+        ScoreText,
+        Text::new("0"),
+        Transform::from_xyz(0.0, 0.0, 1.0),
+        TextColor(Color::BLACK),
+    ));
 }
 
 /// The gravity system
@@ -103,10 +103,7 @@ pub fn handle_input(
 }
 
 /// Detect when the player goes out of bounds
-pub fn check_out_of_bounds(
-    transform: Single<&Transform, With<Player>>,
-    mut commands: Commands
-) {
+pub fn check_out_of_bounds(transform: Single<&Transform, With<Player>>, mut commands: Commands) {
     let Vec3 { y, .. } = transform.translation;
     let bottom = y - PLAYER_HALF_HEIGHT;
     let top = y + PLAYER_HALF_HEIGHT;
@@ -117,7 +114,7 @@ pub fn check_out_of_bounds(
 }
 
 #[allow(dead_code)]
-fn exit_game(_event: On<GameOver>, mut exit: MessageWriter<AppExit>) {
+fn exit_game(_: On<GameOver>, mut exit: MessageWriter<AppExit>) {
     exit.write(AppExit::Success);
 }
 
@@ -142,10 +139,9 @@ fn reset_game(
     score.0 = 0;
 }
 
-pub fn display_score(
+pub fn update_score_text(
     score: Res<Score>,
     mut score_text: Single<&mut Text, With<ScoreText>>,
 ) {
-    score_text.clear();
-    score_text.push_str(&score.0.to_string());
+    score_text.0 = score.0.to_string();
 }
