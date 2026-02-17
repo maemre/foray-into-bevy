@@ -45,6 +45,7 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>,
 ) {
     commands.insert_resource(ClearColor(Color::from(CYAN_300)));
 
@@ -58,6 +59,17 @@ pub fn setup(
             },
             ..OrthographicProjection::default_2d()
         }),
+    ));
+
+    // Add the background image
+    let bg_image = asset_server.load::<Image>("bg.png");
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(MAX_WIDTH, MAX_HEIGHT))),
+        MeshMaterial2d(materials.add(ColorMaterial {
+            texture: Some(bg_image),
+            ..default()
+        })),
+        Transform::from_xyz(0.0, 0.0, -1.0),
     ));
 
     // let's show a simple ellipse
