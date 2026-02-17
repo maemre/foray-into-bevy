@@ -141,9 +141,6 @@ fn reset_game(
     score.0 = 0;
 }
 
-pub fn update_score_text(
-    score: Res<Score>,
-    mut score_text: Single<&mut Text, With<ScoreText>>,
-) {
+pub fn update_score_text(score: Res<Score>, mut score_text: Single<&mut Text, With<ScoreText>>) {
     score_text.0 = score.0.to_string();
 }

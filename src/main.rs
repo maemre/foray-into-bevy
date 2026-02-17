@@ -6,13 +6,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(PipePlugin)
         .add_systems(Startup, setup)
-        .add_systems(
-            FixedUpdate,
-            (
-                gravity,
-                check_out_of_bounds,
-            ),
-        )
+        .add_systems(FixedUpdate, (gravity, check_out_of_bounds))
         .add_systems(Update, (handle_input, update_score_text))
         .run();
 }

@@ -106,8 +106,8 @@ pub fn detect_collisions(
 
     for pipe in pipes {
         let transform = transform_helper.compute_global_transform(pipe).unwrap();
-        let pipe_collider =
-            Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT).aabb_2d(transform.translation().xy());
+        let pipe_collider = Rectangle::new(PIPE_HALF_WIDTH * 2.0, PIPE_HEIGHT)
+            .aabb_2d(transform.translation().xy());
 
         if player_collider.intersects(&pipe_collider) {
             commands.trigger(GameOver);
@@ -119,8 +119,7 @@ pub struct PipePlugin;
 
 impl Plugin for PipePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_pipes)
-        .add_systems(
+        app.add_systems(Startup, spawn_pipes).add_systems(
             FixedUpdate,
             (
                 move_pipes,
