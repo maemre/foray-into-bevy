@@ -40,6 +40,7 @@ const VELOCITY_BOOST: f32 = MAX_HEIGHT / 8.0;
 const PLAYER_HALF_HEIGHT: f32 = 25.0;
 const PLAYER_HALF_WIDTH: f32 = 50.0;
 const PLAYER_X_POS: f32 = -MAX_WIDTH / 4.0;
+const BG_IMAGE_PATH: &str = "bg.png";
 
 pub fn setup(
     mut commands: Commands,
@@ -62,9 +63,10 @@ pub fn setup(
     ));
 
     // Add the background image
-    let bg_image = asset_server.load::<Image>("bg.png");
+    let bg_image = asset_server.load::<Image>(BG_IMAGE_PATH);
+    let bg_rect = Mesh2d(meshes.add(Rectangle::new(MAX_WIDTH, MAX_HEIGHT)));
     commands.spawn((
-        Mesh2d(meshes.add(Rectangle::new(MAX_WIDTH, MAX_HEIGHT))),
+        bg_rect,
         MeshMaterial2d(materials.add(ColorMaterial {
             texture: Some(bg_image),
             ..default()
