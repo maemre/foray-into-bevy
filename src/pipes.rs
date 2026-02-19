@@ -45,12 +45,18 @@ fn spawn_pipes_at(
     info!("spawning pipes at x coordinate: {center_x}");
     let material = MeshMaterial2d(materials.add(Color::from(GREEN_600)));
     let rect = Mesh2d(meshes.add(Rectangle::new(2.0 * PIPE_HALF_WIDTH, PIPE_HEIGHT)));
+    let small_rect = Mesh2d(meshes.add(Rectangle::new(2.5 * PIPE_HALF_WIDTH, 0.2 * PIPE_HEIGHT)));
     // spawn the top pipe
     commands.spawn((
         TopPipe,
         rect.clone(),
         material.clone(),
         Transform::from_xyz(center_x, MAX_HEIGHT / 2.0, 1.0),
+        children![(
+            small_rect.clone(),
+            material.clone(),
+            Transform::from_xyz(-0.0, -PIPE_HEIGHT / 2.0, 1.0),
+        )],
     ));
 
     // spawn the bottom pipe
@@ -59,6 +65,11 @@ fn spawn_pipes_at(
         rect,
         material.clone(),
         Transform::from_xyz(center_x, -MAX_HEIGHT / 2.0, 1.0),
+        children![(
+            small_rect,
+            material.clone(),
+            Transform::from_xyz(-0.0, PIPE_HEIGHT / 2.0, 1.0),
+        )],
     ));
 }
 

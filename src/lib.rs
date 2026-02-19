@@ -86,7 +86,7 @@ pub fn setup(
         Gravity::default(),
         ellipse,
         material,
-        Transform::from_xyz(PLAYER_X_POS, 0.0, 1.0),
+        Transform::from_xyz(PLAYER_X_POS, 0.0, 2.0),
     ));
 
     commands.add_observer(reset_game);
