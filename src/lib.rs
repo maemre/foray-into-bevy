@@ -3,6 +3,7 @@
 use bevy::{
     camera::ScalingMode,
     color::palettes::tailwind::{CYAN_300, RED_600},
+    dev_tools::picking_debug::DebugPickingMode,
     input::keyboard::Key,
     prelude::*,
 };
@@ -79,6 +80,7 @@ pub fn setup(
     let material = MeshMaterial2d(materials.add(Color::from(RED_600)));
 
     commands.spawn((
+        Name::new("Player"),
         Player,
         Velocity::default(),
         Gravity::default(),
@@ -166,5 +168,16 @@ pub fn toggle_pause(keyboard: Res<ButtonInput<KeyCode>>, mut time: ResMut<Time<V
         } else {
             time.pause();
         }
+    }
+}
+
+pub fn toggle_debug(keyboard: Res<ButtonInput<KeyCode>>, mut mode: ResMut<DebugPickingMode>) {
+    use DebugPickingMode::*;
+    if keyboard.just_pressed(KeyCode::KeyD) {
+        *mode = match *mode {
+            Disabled => Normal,
+            Normal => Noisy,
+            Noisy => Disabled,
+        };
     }
 }
